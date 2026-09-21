@@ -162,7 +162,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       if (quantity > 0) {
                         quantity--;
                       }
-                      ;
                     }),
                   },
                   child: Container(
