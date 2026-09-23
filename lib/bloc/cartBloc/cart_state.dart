@@ -12,3 +12,9 @@ final class CartLoaded extends CartState {
 
   CartLoaded(this.cartItems);
 }
+
+final class CartError extends CartState {
+  final String message;
+
+  CartError(this.message);
+}

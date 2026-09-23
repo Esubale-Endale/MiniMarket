@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mini_market/bloc/cartBloc/cart_bloc.dart';
+import 'package:mini_market/bloc/productBloc/products_bloc.dart';
 import 'package:mini_market/models/product.dart';
 
 import '../data/categories.dart';
@@ -78,172 +79,203 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final product = MarketStore.findProduct(widget.productId);
+    return BlocBuilder<ProductsBloc, ProductsState>(
+      builder: (context, productsState) {
+        if (productsState is ProductsLoading) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Product')),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    // The product can be missing if it was deleted while we were away.
-    if (product == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Product')),
-        body: const Center(
-          child: Text(
-            'This product is no longer available.',
-            style: TextStyle(color: Colors.grey),
-          ),
-        ),
-      );
-    }
+        if (productsState is ProductsError) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Product')),
+            body: Center(child: Text(productsState.message)),
+          );
+        }
 
-    final color = colorForCategory(product.category);
+        Product? product;
+        if (productsState is ProductsLoaded) {
+          for (final item in productsState.products) {
+            if (item.id == widget.productId) {
+              product = item;
+              break;
+            }
+          }
+        }
 
-    return BlocBuilder<CartBloc, CartState>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              product.title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            actions: [
-              IconButton(
-                onPressed: _editProduct,
-                icon: const Icon(Icons.edit_outlined),
+        // The product can be missing if it was deleted while we were away.
+        if (product == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Product')),
+            body: const Center(
+              child: Text(
+                'This product is no longer available.',
+                style: TextStyle(color: Colors.grey),
               ),
-              IconButton(
-                onPressed: _deleteProduct,
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-              ),
-            ],
-            bottom: const PreferredSize(
-              preferredSize: Size.fromHeight(1),
-              child: Divider(height: 1),
             ),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 220,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    iconForCategory(product.category),
-                    color: color,
-                    size: 80,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  product.title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "\$${product.price}",
+          );
+        }
+
+        final selectedProduct = product;
+        final color = colorForCategory(selectedProduct.category);
+
+        return BlocBuilder<CartBloc, CartState>(
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  selectedProduct.title,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2563EB),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  product.description,
-                  style: const TextStyle(fontSize: 15, color: Colors.grey),
+                actions: [
+                  IconButton(
+                    onPressed: _editProduct,
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                  IconButton(
+                    onPressed: _deleteProduct,
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  ),
+                ],
+                bottom: const PreferredSize(
+                  preferredSize: Size.fromHeight(1),
+                  child: Divider(height: 1),
                 ),
-                const SizedBox(height: 24),
-                Row(
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Qty', style: TextStyle(color: Colors.grey)),
-                    const SizedBox(width: 16),
-                    // The "-" button. Passing null to onPressed below 1 makes
-                    // Flutter show the button as disabled.
-                    GestureDetector(
-                      onTap: () => {
-                        setState(() {
-                          if (quantity > 0) {
-                            quantity--;
-                          }
-                        }),
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: BoxBorder.all(
-                            width: 1,
-                            color: Colors.grey.shade300,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Icon(Icons.remove),
+                    Container(
+                      height: 220,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        iconForCategory(selectedProduct.category),
+                        color: color,
+                        size: 80,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    Text(
+                      selectedProduct.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "\$${selectedProduct.price}",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      selectedProduct.description,
+                      style: const TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        const Text('Qty', style: TextStyle(color: Colors.grey)),
+                        const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () => {
+                            setState(() {
+                              if (quantity > 0) {
+                                quantity--;
+                              }
+                            }),
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1,
+                                color: Colors.grey.shade300,
+                              ),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                            child: Icon(Icons.remove),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 44,
+                          child: Text(
+                            '$quantity',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => {
+                            setState(() {
+                              quantity++;
+                            }),
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1,
+                                color: Colors.grey.shade300,
+                              ),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                            child: Icon(Icons.add),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
                     SizedBox(
-                      width: 44,
-                      child: Text(
-                        '$quantity',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    // The "+" button.
-                    GestureDetector(
-                      onTap: () => {
-                        setState(() {
-                          quantity++;
-                        }),
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: BoxBorder.all(
-                            width: 1,
-                            color: Colors.grey.shade300,
+                      width: double.infinity,
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: _addToCart,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
-                        child: Icon(Icons.add),
+                        child: const Text(
+                          'Add to cart',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: ElevatedButton(
-                    onPressed: _addToCart,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text(
-                      'Add to cart',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

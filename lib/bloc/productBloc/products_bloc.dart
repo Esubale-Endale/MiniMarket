@@ -9,23 +9,42 @@ part 'products_state.dart';
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   ProductsBloc() : super(ProductsInitial()) {
     on<LoadProducts>((event, emit) {
-      emit(ProductsLoading());
-      emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      try {
+        emit(ProductsLoading());
+        emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      } catch (error) {
+        emit(ProductsError(error.toString()));
+      }
     });
 
     on<AddProduct>((event, emit) {
-      MarketStore.addProduct(event.product);
-      emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      try {
+        emit(ProductsLoading());
+        MarketStore.addProduct(event.product);
+        emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      } catch (error) {
+        emit(ProductsError(error.toString()));
+      }
     });
 
     on<UpdateProduct>((event, emit) {
-      MarketStore.updateProduct(event.product);
-      emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      try {
+        emit(ProductsLoading());
+        MarketStore.updateProduct(event.product);
+        emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      } catch (error) {
+        emit(ProductsError(error.toString()));
+      }
     });
 
     on<DeleteProduct>((event, emit) {
-      MarketStore.deleteProduct(event.productId);
-      emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      try {
+        emit(ProductsLoading());
+        MarketStore.deleteProduct(event.productId);
+        emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
+      } catch (error) {
+        emit(ProductsError(error.toString()));
+      }
     });
 
     add(LoadProducts());

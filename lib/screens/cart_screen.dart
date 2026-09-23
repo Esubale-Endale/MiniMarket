@@ -15,9 +15,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   void _removeItem(String productId) {
-    setState(() {
-      MarketStore.removeFromCart(productId);
-    });
+    context.read<CartBloc>().add(RemoveFromCart(productId));
   }
 
   Future<void> _checkout() async {
@@ -37,9 +35,7 @@ class _CartScreenState extends State<CartScreen> {
 
     if (!mounted) return;
 
-    setState(() {
-      MarketStore.clearCart();
-    });
+    context.read<CartBloc>().add(ClearCart());
   }
 
   @override
@@ -47,18 +43,23 @@ class _CartScreenState extends State<CartScreen> {
     // final items = MarketStore.cart;
     return BlocBuilder<CartBloc, CartState>(
       builder: (context, state) {
+        if (state is CartLoading) {
+          return Scaffold(
+            appBar: _appBar(),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state is CartError) {
+          return Scaffold(
+            appBar: _appBar(),
+            body: Center(child: Text(state.message)),
+          );
+        }
+
         final items = state is CartLoaded ? state.cartItems : <CartItem>[];
         return Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              'Your cart',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            bottom: const PreferredSize(
-              preferredSize: Size.fromHeight(1),
-              child: Divider(height: 1),
-            ),
-          ),
+          appBar: _appBar(),
           body: items.isEmpty
               ? const Center(
                   child: Text(
@@ -164,6 +165,19 @@ class _CartScreenState extends State<CartScreen> {
                 ),
         );
       },
+    );
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      title: const Text(
+        'Your cart',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(1),
+        child: Divider(height: 1),
+      ),
     );
   }
 }
