@@ -5,4 +5,8 @@ sealed class ProductsState {}
 
 final class ProductsInitial extends ProductsState {}
 
-final class ProductLoadded extends ProductsState{}
+final class ProductsLoaded extends ProductsState {
+  final List<Product> products;
+
+  ProductsLoaded(this.products);
+}

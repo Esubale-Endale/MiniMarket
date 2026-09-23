@@ -3,6 +3,7 @@
         android:label="mini_market"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <uses-permission android:name=""/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

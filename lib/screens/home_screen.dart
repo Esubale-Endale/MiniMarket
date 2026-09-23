@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mini_market/bloc/cartBloc/cart_bloc.dart';
 
 import '../data/categories.dart';
 import '../data/market_store.dart';
@@ -50,60 +52,73 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final products = MarketStore.products;
 
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: const Text(
-          'Mini Market',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          GestureDetector(
-            onTap: _openCart,
-            child: Badge(
-              isLabelVisible: MarketStore.cartCount > 0,
-              label: Text("${MarketStore.cartCount}"),
-              child: Icon(Icons.shopping_cart),
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        int cartCount = 0;
+
+        if (state is CartAdded) {
+          cartCount = state.cartItems.fold(
+            0,
+            (sum, item) => sum + item.quantity,
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            centerTitle: false,
+            title: const Text(
+              'Mini Market',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            actions: [
+              GestureDetector(
+                onTap: _openCart,
+                child: Badge(
+                  isLabelVisible: MarketStore.cartCount > 0,
+                  label: Text("$cartCount"),
+                  child: Icon(Icons.shopping_cart),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(1),
+              child: Divider(height: 1),
             ),
           ),
-          const SizedBox(width: 8),
-        ],
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: products.isEmpty
-            ? const Center(
-                child: Text(
-                  'No products yet.\nTap + to add your first one.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-              )
-            : GridView.builder(
-                itemCount: products.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 0.85,
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  Product product = products[index];
-                  return _ProductCard(
-                    product: products[index],
-                    onTap: () => {_openProduct(product)},
-                  );
-                },
-              ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAddProduct,
-        child: const Icon(Icons.add),
-      ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: products.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No products yet.\nTap + to add your first one.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : GridView.builder(
+                    itemCount: products.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 0.85,
+                    ),
+                    itemBuilder: (BuildContext context, int index) {
+                      Product product = products[index];
+                      return _ProductCard(
+                        product: products[index],
+                        onTap: () => {_openProduct(product)},
+                      );
+                    },
+                  ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _openAddProduct,
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 }

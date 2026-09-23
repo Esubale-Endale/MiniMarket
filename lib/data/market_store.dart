@@ -1,13 +1,5 @@
 import '../models/product.dart';
 
-/// Holds all the data of the app in memory.
-///
-/// Everything is `static`, so any screen can read or change the same lists
-/// by writing `MarketStore.products` or `MarketStore.cart`. After changing
-/// something, the screen calls `setState` to redraw itself.
-///
-/// (The data is lost when the app closes. A real app would use a database
-/// or a server here.)
 class MarketStore {
   // Nobody should create a MarketStore object.
   MarketStore._();
@@ -56,13 +48,10 @@ class MarketStore {
       description: 'Water resistant backpack with a laptop pocket.',
     ),
   ];
-
   static final List<CartItem> cart = [];
 
-  // ---------------------------------------------------------------- products
+  // --------------------- products -------------------------------------------
 
-  /// Finds a product by its id, or returns null when it no longer exists
-  /// (for example because it was deleted on the detail screen).
   static Product? findProduct(String id) {
     for (final product in products) {
       if (product.id == id) return product;
@@ -101,7 +90,7 @@ class MarketStore {
     return 'p${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  // -------------------------------------------------------------------- cart
+  // -----------------------  cart  ---------------------------------------------
 
   /// Adds a product to the cart. If it is already there, only the
   /// quantity goes up.

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mini_market/bloc/cartBloc/cart_bloc.dart';
+import 'package:mini_market/models/product.dart';
 
 import '../data/categories.dart';
 import '../data/market_store.dart';
@@ -41,116 +44,126 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final items = MarketStore.cart;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Your cart',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1),
-        ),
-      ),
-      body: items.isEmpty
-          ? const Center(
-              child: Text(
-                'Your cart is empty.',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: items.length,
-                    separatorBuilder: (context, index) =>
-                        const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final color = colorForCategory(item.product.category);
-
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                        leading: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            iconForCategory(item.product.category),
-                            color: color,
-                          ),
-                        ),
-                        title: Text(
-                          item.product.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text('Qty ${item.quantity}'),
-                        trailing: IconButton(
-                          onPressed: () => _removeItem(item.product.id),
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      );
-                    },
+    // final items = MarketStore.cart;
+    return BlocBuilder<CartBloc, CartState>(
+      builder: (context, state) {
+        final items = state is CartAdded ? state.cartItems : <CartItem>[];
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              'Your cart',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(1),
+              child: Divider(height: 1),
+            ),
+          ),
+          body: items.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Your cart is empty.',
+                    style: TextStyle(color: Colors.grey),
                   ),
-                ),
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: items.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          final color = colorForCategory(item.product.category);
+
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                            ),
+                            leading: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                iconForCategory(item.product.category),
+                                color: color,
+                              ),
+                            ),
+                            title: Text(
+                              item.product.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text('Qty ${item.quantity}'),
+                            trailing: IconButton(
+                              onPressed: () => _removeItem(item.product.id),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                         children: [
-                          const Text(
-                            'Total',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Total',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                "\$${MarketStore.cartTotal}",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            "\$${MarketStore.cartTotal}",
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(height: 12),
+                          // checkout button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: OutlinedButton(
+                              onPressed: _checkout,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.black,
+                                side: BorderSide(color: Colors.grey.shade300),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'Checkout',
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: OutlinedButton(
-                          onPressed: _checkout,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                            side: BorderSide(color: Colors.grey.shade300),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            'Checkout',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+        );
+      },
     );
   }
 }
