@@ -9,22 +9,23 @@ part 'cart_state.dart';
 class CartBloc extends Bloc<CartEvent, CartState> {
   CartBloc() : super(CartInitial()) {
     on<LoadCart>((event, emit) {
-      emit(CartAdded(List<CartItem>.from(MarketStore.cart)));
+      emit(CartLoading());
+      emit(CartLoaded(List<CartItem>.from(MarketStore.cart)));
     });
 
     on<AddToCart>((event, emit) {
       MarketStore.addToCart(event.item.product, event.item.quantity);
-      emit(CartAdded(List<CartItem>.from(MarketStore.cart)));
+      emit(CartLoaded(List<CartItem>.from(MarketStore.cart)));
     });
 
     on<RemoveFromCart>((event, emit) {
       MarketStore.removeFromCart(event.productId);
-      emit(CartAdded(List<CartItem>.from(MarketStore.cart)));
+      emit(CartLoaded(List<CartItem>.from(MarketStore.cart)));
     });
 
     on<ClearCart>((event, emit) {
       MarketStore.clearCart();
-      emit(CartAdded(List<CartItem>.from(MarketStore.cart)));
+      emit(CartLoaded(List<CartItem>.from(MarketStore.cart)));
     });
 
     on<IncreaseQuantity>((event, emit) {
@@ -32,7 +33,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       if (product == null) return;
 
       MarketStore.addToCart(product, event.amount);
-      emit(CartAdded(List<CartItem>.from(MarketStore.cart)));
+      emit(CartLoaded(List<CartItem>.from(MarketStore.cart)));
     });
 
     on<DecreaseQuantity>((event, emit) {
@@ -50,7 +51,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         item.quantity = remaining;
       }
 
-      emit(CartAdded(List<CartItem>.from(MarketStore.cart)));
+      emit(CartLoaded(List<CartItem>.from(MarketStore.cart)));
     });
+
+    add(LoadCart());
   }
 }

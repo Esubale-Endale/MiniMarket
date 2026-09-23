@@ -5,10 +5,10 @@ sealed class CartState {}
 
 final class CartInitial extends CartState {}
 
-final class CartAdded extends CartState {
+final class CartLoading extends CartState {}
+
+final class CartLoaded extends CartState {
   final List<CartItem> cartItems;
 
-  CartAdded(this.cartItems);
+  CartLoaded(this.cartItems);
 }
-
-final class CartEmpty extends CartState {}

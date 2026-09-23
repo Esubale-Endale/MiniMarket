@@ -39,7 +39,9 @@ void main() {
     final bloc = ProductsBloc();
     bloc.add(LoadProducts());
 
-    final state = await bloc.stream.first;
+    final state = await bloc.stream.firstWhere(
+      (state) => state is ProductsLoaded,
+    );
 
     expect(state, isA<ProductsLoaded>());
     expect((state as ProductsLoaded).products.first.title, 'Phone X');
@@ -60,9 +62,10 @@ void main() {
 
     expect(states.isNotEmpty, isTrue);
     final lastState = states.last;
-    expect(lastState, isA<CartAdded>());
-    expect((lastState as CartAdded).cartItems.single.quantity, 3);
-    expect(lastState.cartItems.single.product.id, product.id);
+    expect(lastState, isA<CartLoaded>());
+    final loadedState = lastState as CartLoaded;
+    expect(loadedState.cartItems.single.quantity, 3);
+    expect(loadedState.cartItems.single.product.id, product.id);
 
     MarketStore.clearCart();
   });

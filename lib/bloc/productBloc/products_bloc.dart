@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mini_market/data/market_store.dart';
 import 'package:mini_market/models/product.dart';
 
@@ -9,6 +9,7 @@ part 'products_state.dart';
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   ProductsBloc() : super(ProductsInitial()) {
     on<LoadProducts>((event, emit) {
+      emit(ProductsLoading());
       emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
     });
 
@@ -26,5 +27,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       MarketStore.deleteProduct(event.productId);
       emit(ProductsLoaded(List<Product>.from(MarketStore.products)));
     });
+
+    add(LoadProducts());
   }
 }

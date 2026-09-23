@@ -47,7 +47,7 @@ class _CartScreenState extends State<CartScreen> {
     // final items = MarketStore.cart;
     return BlocBuilder<CartBloc, CartState>(
       builder: (context, state) {
-        final items = state is CartAdded ? state.cartItems : <CartItem>[];
+        final items = state is CartLoaded ? state.cartItems : <CartItem>[];
         return Scaffold(
           appBar: AppBar(
             title: const Text(

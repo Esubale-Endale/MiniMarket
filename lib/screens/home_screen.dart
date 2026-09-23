@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, state) {
         int cartCount = 0;
 
-        if (state is CartAdded) {
+        if (state is CartLoaded) {
           cartCount = state.cartItems.fold(
             0,
             (sum, item) => sum + item.quantity,
