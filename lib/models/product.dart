@@ -14,6 +14,26 @@ class Product {
     required this.description,
   });
 
+  factory Product.fromJson(Map<String, dynamic> product) {
+    return Product(
+      id: product['id'] as String,
+      title: product['title'] as String,
+      price: (product['price'] as num).toDouble(),
+      category: product['category'] as String,
+      description: product['description'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'price': price,
+      'category': category,
+      'description': description,
+    };
+  }
+
   /// Returns a copy of this product with some fields replaced.
   /// Used by the edit screen so we never change a product in place.
   Product copyWith({
